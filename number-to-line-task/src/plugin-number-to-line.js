@@ -386,6 +386,8 @@ var numberToLine = (function (jspsych) {
         document.body.style.cursor = "auto";
 
         let cardboard = document.getElementById(Cardboard.FULL_DIV_ID);
+        let panel = document.getElementById(Cardboard.PANEL_ID);
+
         if (cardboard != null){
           HTML_UTILS.ReplaceBackgroundColour(cardboard,
             GUI_CONFIG.CARDBOARD_CORRECT_FEEDBACK_COLOUR,
@@ -396,9 +398,17 @@ var numberToLine = (function (jspsych) {
           HTML_UTILS.ReplaceBackgroundColour(cardboard,
             GUI_CONFIG.CARDBOARD_FROZEN_BACKGROUND_COLOR,
             GUI_CONFIG.CARDBOARD_BACKGROUND_COLOR);
+
+          NumberToLinePlugin.UI.resetCardboardPosition(cardboard);
+
+          let handle = document.getElementById(Cardboard.HANDLE_ID);
+          if (handle != null){
+            handle.style.height = GUI_CONFIG.CARDBOARD_HANDLE_LENGTH;
+            let panelHeight = panel?.style.height ?? GUI_CONFIG.CARDBOARD_PANEL_SIZE;
+            cardboard.style.height = `calc(${panelHeight} + ${handle.style.height})`;
+          }
         }
 
-        let panel = document.getElementById(Cardboard.PANEL_ID);
         if (panel != null)
           panel.innerHTML = "";
 
@@ -416,6 +426,21 @@ var numberToLine = (function (jspsych) {
           case BarRenderer.ID:
             return new BarRenderer(barColor, unitBackgroundColors);
         }
+      }
+
+      static getDefaultCardboardBottomPosition(){
+        return `calc(50vh
+            - (${GUI_CONFIG.CARDBOARD_PANEL_CENTER_FROM_VIEWPORT_CENTER})
+            - ${GUI_CONFIG.CARDBOARD_HANDLE_LENGTH}
+            - ${GUI_CONFIG.CARDBOARD_PANEL_SIZE} / 2)`;
+      }
+
+      static resetCardboardPosition(cardboardDiv){
+        cardboardDiv.style.left = "50%";
+        cardboardDiv.style.top = "";
+        cardboardDiv.style.bottom = NumberToLinePlugin.UI.getDefaultCardboardBottomPosition();
+        cardboardDiv.style.transformOrigin = "";
+        cardboardDiv.style.scale = 1;
       }
 
       static computeStimulusDisplayFunction(targetProvider, trial){
@@ -542,10 +567,7 @@ var numberToLine = (function (jspsych) {
             alreadyClicked,
             displayImmediately);
 
-          cardboardElement.style.bottom = `calc(50vh
-            - (${GUI_CONFIG.CARDBOARD_PANEL_CENTER_FROM_VIEWPORT_CENTER})
-            - ${GUI_CONFIG.CARDBOARD_HANDLE_LENGTH}
-            - ${GUI_CONFIG.CARDBOARD_PANEL_SIZE} / 2)`;
+          cardboardElement.style.bottom = NumberToLinePlugin.UI.getDefaultCardboardBottomPosition();
           return cardboardElement;
         }
 
