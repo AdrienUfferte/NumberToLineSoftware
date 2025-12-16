@@ -1107,6 +1107,12 @@ var numberToLine = (function (jspsych) {
           // Update the correct answer cache for the new target
           trial.correctAnswerOnCurrentLine = NumberToLinePlugin.Maths.computeCorrectAnswer(trial);
 
+          if (trial.endTimeout != undefined){
+            clearTimeout(trial.endTimeout);
+            trial.endTimeout = undefined;
+          }
+          NumberToLinePlugin.Closing.setTimeLimit(trial, jsPsych);
+
           if (trial.startOption == StartOptions.OPEN_CARDBOARD){
             let panel = document.getElementById(Cardboard.PANEL_ID);
             if (panel != null && typeof trial.displayStimulusFunction == "function")
