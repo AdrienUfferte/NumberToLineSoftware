@@ -858,6 +858,29 @@ var numberToLine = (function (jspsych) {
         }
       }
 
+      static archiveCurrentCardboard(trial){
+        let cardboard = document.getElementById(Cardboard.FULL_DIV_ID);
+        if (cardboard == null)
+          return;
+
+        let responseIndex = Array.isArray(trial.responses) ? trial.responses.length : 0;
+        let archivedCardboard = cardboard.cloneNode(true);
+
+        archivedCardboard.id = `${Cardboard.FULL_DIV_ID}-response-${responseIndex}`;
+        archivedCardboard.style.pointerEvents = "none";
+        archivedCardboard.style.cursor = "auto";
+
+        for (let id of [Cardboard.PANEL_ID, Cardboard.HANDLE_ID, Cardboard.HANDLE_END_ID]){
+          let element = archivedCardboard.querySelector(`#${id}`);
+          if (element != null){
+            element.id = `${id}-response-${responseIndex}`;
+            element.style.cursor = "auto";
+          }
+        }
+
+        cardboard.parentNode?.insertBefore(archivedCardboard, cardboard);
+      }
+
       static handleSnap(trial, roundedAnswer){
         let cardboard = document.getElementById(Cardboard.FULL_DIV_ID);
 
@@ -1050,6 +1073,7 @@ var numberToLine = (function (jspsych) {
           // TODO investigate the copyTrial
           NumberToLinePlugin.Closing.finishTrial(jsPsych, trial, jsonUtils.copyTrial(trial), trial.afterTrialDelay)
         } else {
+          NumberToLinePlugin.UI.archiveCurrentCardboard(trial);
           NumberToLinePlugin.Progress.advanceToNextTarget(trial);
           NumberToLinePlugin.Progress.resetCardboardForNextTarget(trial);
 
