@@ -862,6 +862,10 @@ var numberToLine = (function (jspsych) {
           cardboardDuplicateAnimation.play();
           cardboardAnimation.play();
           await cardboardAnimation.finished;
+
+          // Remove the duplicate to avoid duplicated element IDs interfering with
+          // subsequent cardboards (e.g., when another target is presented).
+          cardboardDuplicate.remove();
         }
 
         static async handleFeedback(answer, trial){
