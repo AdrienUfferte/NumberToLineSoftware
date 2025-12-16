@@ -454,7 +454,7 @@ var numberToLine = (function (jspsych) {
               panel.innerHTML = `<img src="${target.toImageNameWithDimensions(
                 trial.imageFileDimension,
                 trial.imageFileDimension,
-                FRACTION_IMAGE_PATH)}" alt="fraction">`;
+                FRACTION_IMAGE_PATH)}" alt="${target.toDisplayString()}">`;
               trial.displayedStimulus = true;
               break;
             case ExperimentCore.VERBAL_MODALITY:
