@@ -419,6 +419,26 @@ var numberToLine = (function (jspsych) {
     }
 
     static UI = class {
+      static ANSWER_CARDBOARD_HEIGHT_SCALE_BASE = 1.5;
+      static ANSWER_CARDBOARD_HEIGHT_SCALE_INCREMENT = 1.5;
+
+      static getNumericHeightPx(element, fallbackPx){
+        let parseHeight = function(heightString){
+          let parsed = Number.parseFloat(heightString);
+          return Number.isFinite(parsed) ? parsed : undefined;
+        };
+
+        let height = parseHeight(element?.style?.height);
+        if (height != undefined)
+          return height;
+
+        height = parseHeight(window.getComputedStyle(element).height);
+        if (height != undefined)
+          return height;
+
+        return fallbackPx;
+      }
+
       static createRenderer(type, barColor, unitBackgroundColors){
         switch (type){
           case LineRenderer.ID:
@@ -906,6 +926,8 @@ var numberToLine = (function (jspsych) {
         }
 
         cardboard.parentNode?.insertBefore(archivedCardboard, cardboard);
+
+        NumberToLinePlugin.UI.makeArchivedCardboardTaller(archivedCardboard, responseIndex);
       }
 
       static handleSnap(trial, roundedAnswer){
@@ -917,6 +939,38 @@ var numberToLine = (function (jspsych) {
         if (trial.useHorizontalSnap)
           // TODO current line
           NumberToLinePlugin.UI.snapHorizontally(cardboard, trial.info.numberLines[0], roundedAnswer);
+      }
+
+      static makeArchivedCardboardTaller(archivedCardboard, responseIndex = 0){
+        let handleElement = archivedCardboard.querySelector(`#${Cardboard.HANDLE_ID}`)
+          ?? archivedCardboard.querySelector(`[id^="${Cardboard.HANDLE_ID}"]`);
+        let panelElement = archivedCardboard.querySelector(`#${Cardboard.PANEL_ID}`)
+          ?? archivedCardboard.querySelector(`[id^="${Cardboard.PANEL_ID}"]`);
+        if (handleElement == null || panelElement == null)
+          return;
+
+        let responsePanelElement = Renderer.getResponsePanelElement();
+        let responsePanelBottom = responsePanelElement?.getBoundingClientRect().bottom;
+        let initialCardboardBottom = archivedCardboard.getBoundingClientRect().bottom;
+
+        let panelHeight = NumberToLinePlugin.UI.getNumericHeightPx(
+          panelElement,
+          Number.parseFloat(GUI_CONFIG.CARDBOARD_PANEL_SIZE));
+        let handleHeight = NumberToLinePlugin.UI.getNumericHeightPx(
+          handleElement,
+          Number.parseFloat(GUI_CONFIG.CARDBOARD_HANDLE_LENGTH));
+        let heightScale = NumberToLinePlugin.UI.ANSWER_CARDBOARD_HEIGHT_SCALE_BASE
+          + responseIndex * NumberToLinePlugin.UI.ANSWER_CARDBOARD_HEIGHT_SCALE_INCREMENT;
+        let extendedHandleHeight = handleHeight * heightScale;
+
+        handleElement.style.height = `${extendedHandleHeight}px`;
+        let newCardboardHeight = panelHeight + extendedHandleHeight;
+        archivedCardboard.style.height = `${newCardboardHeight}px`;
+
+        if (responsePanelBottom != undefined || initialCardboardBottom != undefined){
+          let anchorBottom = responsePanelBottom ?? initialCardboardBottom;
+          archivedCardboard.style.top = `${anchorBottom - newCardboardHeight}px`;
+        }
       }
 
       static snapVertically(cardboardDiv){
