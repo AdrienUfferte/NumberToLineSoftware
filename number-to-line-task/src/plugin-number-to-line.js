@@ -419,8 +419,7 @@ var numberToLine = (function (jspsych) {
     }
 
     static UI = class {
-      static ANSWER_CARDBOARD_HEIGHT_SCALE_BASE = 1.5;
-      static ANSWER_CARDBOARD_HEIGHT_SCALE_INCREMENT = 1.5;
+      static ANSWER_CARDBOARD_HEIGHT_SCALE_BASE = 1;
 
       static getNumericHeightPx(element, fallbackPx){
         let parseHeight = function(heightString){
@@ -925,6 +924,14 @@ var numberToLine = (function (jspsych) {
           }
         }
 
+        for (let element of archivedCardboard.querySelectorAll(
+          `#${Cardboard.PANEL_ID}-response-${responseIndex}, ` +
+          `#${Cardboard.HANDLE_ID}-response-${responseIndex}, ` +
+          `#${Cardboard.HANDLE_END_ID}-response-${responseIndex}`
+        )){
+          element.style.backgroundColor = GUI_CONFIG.CARDBOARD_BACKGROUND_COLOR;
+        }
+
         cardboard.parentNode?.insertBefore(archivedCardboard, cardboard);
 
         NumberToLinePlugin.UI.makeArchivedCardboardTaller(archivedCardboard, responseIndex);
@@ -959,9 +966,8 @@ var numberToLine = (function (jspsych) {
         let handleHeight = NumberToLinePlugin.UI.getNumericHeightPx(
           handleElement,
           Number.parseFloat(GUI_CONFIG.CARDBOARD_HANDLE_LENGTH));
-        let heightScale = NumberToLinePlugin.UI.ANSWER_CARDBOARD_HEIGHT_SCALE_BASE
-          + responseIndex * NumberToLinePlugin.UI.ANSWER_CARDBOARD_HEIGHT_SCALE_INCREMENT;
-        let extendedHandleHeight = handleHeight * heightScale;
+        let extendedHandleHeight = handleHeight
+          + responseIndex * panelHeight * NumberToLinePlugin.UI.ANSWER_CARDBOARD_HEIGHT_SCALE_BASE;
 
         handleElement.style.height = `${extendedHandleHeight}px`;
         let newCardboardHeight = panelHeight + extendedHandleHeight;
